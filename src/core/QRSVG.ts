@@ -356,10 +356,29 @@ export default class QRSVG {
       }
 
       this._image = image;
-      image.onload = (): void => {
+
+      if (options.imageOptions.color) {
+        if (options.image.includes('fill=')) {
+          // Replace the existing fill color with the new fill color
+          options.image = options.image.replace(/fill=".*?"/, `fill="${options.imageOptions.color}"`);
+        } else {
+          // Add the fill attribute with the new fill color
+          options.image = options.image.replace('<svg', `<svg fill="${options.imageOptions.color}"`);
+        }
+        
+        const blob = new Blob([options.image], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+
+        image.src = url;
+
         resolve();
-      };
-      image.src = options.image;
+      } else {
+        image.onload = (): void => {
+          resolve();
+        };
+        
+        image.src = options.image;
+      }
     });
   }
 
